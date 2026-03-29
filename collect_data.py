@@ -36,4 +36,4 @@ for name, symbol in tickers.items():
         pass
 
 with open(f"{today}.md", "w", encoding="utf-8") as f:
-    f.write(content))
+    f.write(content)
