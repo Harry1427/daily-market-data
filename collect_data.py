@@ -6,7 +6,7 @@ import pytz
 tz = pytz.timezone('Asia/Seoul')
 today = datetime.now(tz).strftime('%Y-%m-%d')
 
-# 수집할 지표 목록 (이미지 속 모든 항목)
+# 수집할 지표 목록
 tickers = {
     "나스닥": "^IXIC", "S&P500": "^GSPC", "다우": "^DJI", "러셀2000": "^RUT",
     "필라델피아반도체": "^SOX", "코스피200": "^KS200", 
@@ -16,8 +16,8 @@ tickers = {
     "옥수수": "ZC=F", "밀": "ZW=F", "대두": "ZS=F"
 }
 
-content = f"---\ndate: {today}\n---\n# 📅 {today} 시장 브리핑\n\n"
-content += "| 지표 | 현재가 | 등락율 |\n| :--- | :--- | :--- |\n"
+properties = f"---\ndate: {today}\n"
+table_content = f"# 📅 {today} 시장 브리핑\n\n| 지표 | 현재가 | 등락율 |\n| :--- | :--- | :--- |\n"
 
 for name, symbol in tickers.items():
     try:
@@ -28,12 +28,13 @@ for name, symbol in tickers.items():
         prev_price = data['Close'].iloc[-2]
         change_pct = ((current_price - prev_price) / prev_price) * 100
         
-        # 옵시디언에서 인식할 수 있게 메타데이터(속성)로도 저장
-        content += f"| {name} | {current_price:,.2f} | {change_pct:+.2f}% |\n"
-        # 개별 속성 저장 (그래프용)
-        content = content.replace("---", f"---\n{name}: {current_price:.2f}\ndate: {today}", 1)
+        properties += f"{name}: {current_price:.2f}\n"
+        table_content += f"| **{name}** | {current_price:,.2f} | {change_pct:+.2f}% |\n"
     except:
         pass
 
+# 최종 텍스트 합치기 및 저장
+final_content = properties + "---\n\n" + table_content
+
 with open(f"{today}.md", "w", encoding="utf-8") as f:
-    f.write(content)
+    f.write(final_content)
