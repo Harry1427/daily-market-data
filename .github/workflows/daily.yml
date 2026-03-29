@@ -1,0 +1,34 @@
+name: Daily Market Data Update
+
+on:
+  schedule:
+    - cron: '0 22 * * *' # 한국시간 매일 아침 8시에 실행
+  workflow_dispatch: # 내가 원할 때 수동으로 실행하는 버튼 만들기
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 파일 쓰기 권한
+    steps:
+      - name: 내 창고 파일 가져오기
+        uses: actions/checkout@v4
+      
+      - name: 파이썬 준비하기
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: 데이터 수집 도구 설치
+        run: pip install yfinance pytz
+        
+      - name: 파이썬 코드 실행 (데이터 수집!)
+        run: python collect_data.py
+        
+      - name: 결과물을 창고에 저장하기
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "오늘의 시장 데이터 자동 저장" || echo "바뀐 내용이 없습니다."
+          git push
